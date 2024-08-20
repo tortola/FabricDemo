@@ -1,0 +1,9 @@
+{
+  "version": "4.0",
+  "datasetReference": {
+    "byPath": {
+      "path": "../gold_sm_poc_data.SemanticModel"
+    },
+    "byConnection": null
+  }
+}

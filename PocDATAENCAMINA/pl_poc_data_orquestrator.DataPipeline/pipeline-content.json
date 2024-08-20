@@ -1,0 +1,161 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "ea4f267d-e05c-4505-9f13-27301eb53854",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "DefaultLakehouseName": {
+              "value": "Bronze_lh_poc_data",
+              "type": "string"
+            },
+            "path_config_file": {
+              "value": "Files/config_files/bronze_config_file.csv",
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Load Bronze",
+        "dependsOn": []
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "ea4f267d-e05c-4505-9f13-27301eb53854",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "DefaultLakehouseName": {
+              "value": "Silver_lh_poc_data",
+              "type": "string"
+            },
+            "path_config_file": {
+              "value": "Files/config_files/silver_config_file.csv",
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Load Silver",
+        "dependsOn": [
+          {
+            "activity": "Load Bronze",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "ea4f267d-e05c-4505-9f13-27301eb53854",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "DefaultLakehouseName": {
+              "value": "Gold_lh_poc_data",
+              "type": "string"
+            },
+            "path_config_file": {
+              "value": "Files/config_files/gold_config_file_dim.csv",
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Load Gold Dimensions",
+        "dependsOn": [
+          {
+            "activity": "Load Silver",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "ea4f267d-e05c-4505-9f13-27301eb53854",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "DefaultLakehouseName": {
+              "value": "Gold_lh_poc_data",
+              "type": "string"
+            },
+            "path_config_file": {
+              "value": "Files/config_files/gold_config_file_fact.csv",
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Load Gold Facts",
+        "dependsOn": [
+          {
+            "activity": "Load Gold Dimensions",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "PBISemanticModelRefresh",
+        "typeProperties": {
+          "method": "post",
+          "groupId": "5370d354-d5bc-43fe-96f9-946edbf670ee",
+          "datasetId": "85331558-4454-4199-ac08-dd85949d1198",
+          "commitMode": "Transactional",
+          "waitOnCompletion": true,
+          "operationType": "SemanticModelRefresh"
+        },
+        "externalReferences": {
+          "connection": "087b1d3f-5a26-4cde-b8de-cf350381bd5c"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "gold_sm refresh",
+        "dependsOn": [
+          {
+            "activity": "Load Gold Facts",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
